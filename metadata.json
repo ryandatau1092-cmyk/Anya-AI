@@ -1,0 +1,8 @@
+{
+  "name": "(PERSIAPAN RELEASE) Agen Fleksibel v2.0 By SiskaMo",
+  "description": "A customizable Voice Agent with glassmorphism UI, flexible personality settings, and real-time voice/chat capabilities.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
