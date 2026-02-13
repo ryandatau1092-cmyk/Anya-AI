@@ -164,7 +164,7 @@ const App: React.FC = () => {
 
   if (!isDbReady) {
     return (
-      <div className="h-screen w-screen bg-black flex flex-col items-center justify-center gap-6 animate-in fade-in duration-1000">
+      <div className="h-[100dvh] w-full bg-black flex flex-col items-center justify-center gap-6 animate-in fade-in duration-1000">
         <div className="relative">
           <div className="w-16 h-16 border-4 border-pink-500/10 border-t-pink-500 rounded-full animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center">
@@ -179,7 +179,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden flex flex-col items-center justify-center">
+    <div className="relative h-[100dvh] w-full overflow-hidden flex flex-col items-center justify-center">
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000"
         style={{ backgroundImage: `url(${config.background})` }}
@@ -205,7 +205,7 @@ const App: React.FC = () => {
 
       <main className="relative z-10 w-full h-full flex flex-col items-center justify-center overflow-hidden transition-all duration-500">
         {appState === AppState.SETUP && (
-          <div className="w-full h-full flex items-center justify-center animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="w-full h-full flex items-center justify-center animate-in fade-in slide-in-from-top-4 duration-700 p-2">
             <SetupView 
               config={config} 
               setConfig={setConfig} 
