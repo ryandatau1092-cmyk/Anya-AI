@@ -179,7 +179,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden flex flex-col items-center justify-center">
+    <div className="relative h-[100dvh] w-full overflow-hidden flex flex-col items-center justify-start">
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000"
         style={{ backgroundImage: `url(${config.background})` }}
@@ -203,7 +203,7 @@ const App: React.FC = () => {
         onReset={resetAll}
       />
 
-      <main className="relative z-10 w-full h-full flex flex-col items-center justify-center overflow-hidden transition-all duration-500">
+      <main className="relative z-10 w-full h-full flex flex-col items-center justify-start overflow-hidden transition-all duration-500">
         {appState === AppState.SETUP && (
           <div className="w-full h-full flex items-center justify-center animate-in fade-in slide-in-from-top-4 duration-700 p-2">
             <SetupView 

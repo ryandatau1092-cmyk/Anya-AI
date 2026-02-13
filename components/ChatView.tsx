@@ -406,7 +406,8 @@ const ChatView: React.FC<ChatViewProps> = ({
 
   return (
     <div className="w-full h-full flex flex-col p-3 md:p-8 max-w-6xl mx-auto relative overflow-hidden" onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); handleFiles(e.dataTransfer.files); }}>
-      <header className="flex items-center justify-between p-3 md:p-4 rounded-full mb-4 md:mb-6 shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-300 shrink-0" style={glassStyles}>
+      {/* HEADER: Dibuat STICKY agar tetap berada di paling atas saat viewport menciut */}
+      <header className="sticky top-0 z-[100] flex items-center justify-between p-3 md:p-4 rounded-full mb-4 md:mb-6 shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all duration-300 shrink-0" style={glassStyles}>
         <div className="flex items-center gap-3 md:gap-4">
           <button onClick={onOpenSidebar} className="p-2.5 md:p-3 hover:bg-white/10 rounded-full transition-all"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg></button>
           <div className="relative group/avatar cursor-pointer" onClick={() => setShowProfilePreview(true)}>
