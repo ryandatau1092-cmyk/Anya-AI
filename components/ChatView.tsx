@@ -46,7 +46,6 @@ const ChatView: React.FC<ChatViewProps> = ({
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const profileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -170,6 +169,15 @@ const ChatView: React.FC<ChatViewProps> = ({
       };
       reader.readAsDataURL(file);
     });
+  };
+
+  const handleProfileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => setConfig({ ...config, profilePic: reader.result as string });
+      reader.readAsDataURL(file);
+    }
   };
 
   const removeAttachment = (index: number) => {
@@ -306,34 +314,13 @@ const ChatView: React.FC<ChatViewProps> = ({
 
   const AttachmentPreview: React.FC<{ attachment: Attachment, onRemove?: () => void, onPreview?: () => void }> = ({ attachment, onRemove, onPreview }) => {
     const isImg = attachment.mimeType.startsWith('image/');
-    const isVideo = attachment.mimeType.startsWith('video/');
-    const isAudio = attachment.mimeType.startsWith('audio/');
-    const isPdf = attachment.mimeType === 'application/pdf';
     return (
       <div 
         onClick={onPreview}
         className={`relative group/att w-20 h-20 md:w-24 md:h-24 flex-shrink-0 bg-white/10 rounded-2xl border border-white/10 overflow-hidden shadow-lg transition-all ${onPreview ? 'cursor-pointer hover:scale-105 active:scale-95 hover:border-pink-500/50' : ''}`}
       >
-        {isImg ? ( <img src={attachment.data} className="w-full h-full object-cover" /> ) : isVideo ? (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-purple-500/20 relative">
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/att:bg-black/40 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white drop-shadow-[0_0_15px_rgba(168,85,247,0.8)] group-hover/att:scale-125 transition-transform" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
-            </div>
-          </div>
-        ) : isAudio ? (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-blue-500/20 relative">
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/att:bg-black/40 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] group-hover/att:scale-125 transition-transform" viewBox="0 0 20 20" fill="currentColor"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3V7.82l8-1.6V11.114A4.369 4.369 0 0015 11c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3V3z" /></svg>
-            </div>
-          </div>
-        ) : isPdf ? (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-red-500/20">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" /></svg>
-          </div>
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-white/5">
-             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-          </div>
+        {isImg ? ( <img src={attachment.data} className="w-full h-full object-cover" /> ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center bg-white/5 text-[7px] font-black uppercase text-white/20 px-1 text-center truncate">{attachment.name}</div>
         )}
         {onRemove && (
           <button onClick={(e) => { e.stopPropagation(); onRemove(); }} className="absolute top-1 right-1 p-1 bg-black/60 backdrop-blur-md rounded-lg text-white opacity-0 group-hover/att:opacity-100 transition-all hover:bg-red-500">
@@ -372,8 +359,8 @@ const ChatView: React.FC<ChatViewProps> = ({
   );
 
   return (
-    <div className="w-full h-full flex flex-col pt-[95px] md:pt-[110px] p-3 md:p-8 max-w-6xl mx-auto relative overflow-hidden" onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); handleFiles(e.dataTransfer.files); }}>
-      {/* HEADER: FLYOUT ROUNDED (ngambang) & FIXED biar gak goyang */}
+    <div className="w-full h-[100dvh] flex flex-col pt-[95px] md:pt-[110px] p-3 md:p-8 max-w-6xl mx-auto relative overflow-hidden" onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); handleFiles(e.dataTransfer.files); }}>
+      {/* HEADER: FLYOUT ROUNDED (ngambang) & FIXED */}
       <header className="fixed top-3 left-3 right-3 z-[100] flex items-center justify-between p-3 md:p-5 rounded-[30px] shadow-[0_15px_40px_rgba(0,0,0,0.6)] transition-all duration-300 border border-white/20" style={glassStyles}>
         <div className="flex items-center gap-3 md:gap-5">
           <button onClick={onOpenSidebar} className="p-2.5 md:p-3 hover:bg-white/10 rounded-full transition-all text-white/70 active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" /></svg></button>
@@ -383,10 +370,7 @@ const ChatView: React.FC<ChatViewProps> = ({
           </div>
           <div className="overflow-hidden">
             <h2 className="font-black text-sm md:text-xl leading-tight tracking-tighter text-white truncate max-w-[120px] md:max-w-none">{config.name}</h2>
-            <div className="flex items-center gap-1">
-               <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-               <p className="text-[8px] md:text-[10px] text-green-400 font-black uppercase tracking-[0.2em]">Online Now</p>
-            </div>
+            <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div><p className="text-[8px] md:text-[10px] text-green-400 font-black uppercase tracking-[0.2em]">Online Now</p></div>
           </div>
         </div>
         <div className="flex gap-2.5 items-center pr-2">
@@ -408,74 +392,71 @@ const ChatView: React.FC<ChatViewProps> = ({
               )}
               {editingId === m.id ? (
                 <div className="space-y-3">
-                  <textarea className="w-full bg-black/20 border border-white/20 rounded-xl p-3 outline-none text-xs md:text-sm text-white resize-none min-h-[80px] md:min-h-[100px] custom-scrollbar" value={editText} onChange={e => setEditText(e.target.value)} autoFocus />
-                  <div className="flex gap-2 justify-end">
-                    <button onClick={() => setEditingId(null)} className="text-[9px] md:text-[10px] font-bold uppercase text-white/40 hover:text-white px-3 py-1">Batal</button>
-                    <button onClick={() => handleEditSave(m)} className="text-[9px] md:text-[10px] font-bold uppercase bg-white text-pink-600 px-3 py-1 rounded-lg">Cabangkan</button>
-                  </div>
+                  <textarea className="w-full bg-black/20 border border-white/20 rounded-xl p-3 outline-none text-xs md:text-sm text-white resize-none min-h-[80px] custom-scrollbar" value={editText} onChange={e => setEditText(e.target.value)} autoFocus />
+                  <div className="flex gap-2 justify-end"><button onClick={() => setEditingId(null)} className="text-[10px] font-bold uppercase text-white/40 hover:text-white px-3 py-1">Batal</button><button onClick={() => handleEditSave(m)} className="text-[10px] font-bold uppercase bg-white text-pink-600 px-3 py-1 rounded-lg">Cabangkan</button></div>
                 </div>
               ) : ( <p className="text-xs md:text-sm leading-relaxed whitespace-pre-wrap font-medium text-white/95">{m.text}</p> )}
               {m.role === 'agent' && (
-                <div className="flex gap-2 mt-3 md:mt-4 flex-wrap items-center">
-                  <button onClick={() => handleListen(m)} disabled={loadingAudioId === m.id} className={`text-[9px] md:text-[10px] font-bold uppercase py-2 md:py-2.5 px-4 md:px-5 rounded-xl transition-all border flex items-center gap-2 disabled:opacity-50 ${playingAudioId === m.id ? 'bg-pink-500/20 border-pink-500/30 text-pink-400' : 'bg-white/10 hover:bg-white/20 border-white/10 text-white/80'}`}>{loadingAudioId === m.id ? ( <div className="flex items-center gap-2"><div className="w-2 h-2 bg-pink-500 rounded-full animate-ping"></div><span className="animate-pulse">Generating...</span></div> ) : playingAudioId === m.id ? ( <div className="flex items-center gap-2"><AudioVisualizer /><span>Listening...</span></div> ) : ( <><svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-3.5 md:w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>Listen</> )}</button>
+                <div className="flex gap-2 mt-4 flex-wrap items-center">
+                  <button onClick={() => handleListen(m)} disabled={loadingAudioId === m.id} className={`text-[10px] font-bold uppercase py-2 px-5 rounded-xl transition-all border flex items-center gap-2 disabled:opacity-50 ${playingAudioId === m.id ? 'bg-pink-500/20 border-pink-500/30 text-pink-400' : 'bg-white/10 hover:bg-white/20 border-white/10 text-white/80'}`}>{loadingAudioId === m.id ? ( <div className="flex items-center gap-2"><div className="w-2 h-2 bg-pink-500 rounded-full animate-ping"></div><span className="animate-pulse">Generating...</span></div> ) : playingAudioId === m.id ? ( <div className="flex items-center gap-2"><AudioVisualizer /><span>Listening...</span></div> ) : ( <><svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>Listen</> )}</button>
                 </div>
               )}
             </div>
             <BranchSwitcher message={m} />
           </div>
         ))}
-        {isTyping && ( <div className="flex justify-start"><div className="rounded-[25px] md:rounded-[30px] rounded-tl-none p-4 md:p-5 flex flex-col gap-2 shadow-2xl min-w-[150px] md:min-w-[180px]" style={glassStyles}><div className="flex gap-3 items-center"><div className="flex gap-1.5"><div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce"></div><div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce [animation-delay:0.2s]"></div><div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce [animation-delay:0.4s]"></div></div><span className="text-[10px] md:text-xs font-black text-pink-400 italic">{loadingStatus}</span></div></div></div> )}
+        {isTyping && ( <div className="flex justify-start"><div className="rounded-[30px] rounded-tl-none p-5 flex flex-col gap-2 shadow-2xl min-w-[180px]" style={glassStyles}><div className="flex gap-3 items-center"><div className="flex gap-1.5"><div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce"></div><div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce [animation-delay:0.2s]"></div><div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce [animation-delay:0.4s]"></div></div><span className="text-xs font-black text-pink-400 italic">{loadingStatus}</span></div></div></div> )}
       </div>
 
-      <div className="flex flex-col gap-2 w-full max-w-8xl mx-auto shrink-0 px-1 md:px-2 pb-2 md:pb-4">
+      <div className="flex flex-col gap-2 w-full max-w-8xl mx-auto shrink-0 pb-4">
         {attachedFiles.length > 0 && (
-          <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar p-2.5 bg-white/5 backdrop-blur-3xl rounded-[25px] md:rounded-[30px] border border-white/10 animate-in slide-in-from-bottom-4 duration-300">
-            {attachedFiles.map((file, i) => (
-              <AttachmentPreview key={i} attachment={file} onRemove={() => removeAttachment(i)} />
-            ))}
+          <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar p-2.5 bg-white/5 backdrop-blur-3xl rounded-[30px] border border-white/10 animate-in slide-in-from-bottom-4 duration-300">
+            {attachedFiles.map((file, i) => ( <AttachmentPreview key={i} attachment={file} onRemove={() => removeAttachment(i)} /> ))}
           </div>
         )}
-        <footer className="relative flex items-center gap-2 md:gap-3 p-1.5 md:p-2 rounded-full shadow-[0_15px_35px_rgba(0,0,0,0.4)] transition-all group" style={glassStyles}>
-          <label className="p-3 md:p-3.5 hover:bg-white/10 rounded-full cursor-pointer transition-all active:scale-90 flex items-center justify-center">
+        <footer className="relative flex items-center gap-3 p-2 rounded-full shadow-[0_15px_35px_rgba(0,0,0,0.4)] transition-all group" style={glassStyles}>
+          <label className="p-3.5 hover:bg-white/10 rounded-full cursor-pointer transition-all active:scale-90 flex items-center justify-center">
             <input type="file" className="hidden" multiple accept="image/*,video/*,audio/*,.pdf,.txt" onChange={e => handleFiles(e.target.files)} />
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
           </label>
-          <input type="text" placeholder={`Bisikin ${config.name}...`} className="flex-1 bg-transparent outline-none py-3 text-xs md:text-sm font-semibold text-white placeholder:text-white/20" value={inputText} onChange={e => setInputText(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} />
-          <button onClick={() => handleSend()} disabled={(!inputText.trim() && attachedFiles.length === 0) || isTyping} className="p-3 md:p-3.5 bg-gradient-to-br from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 rounded-full transition-all active:scale-95 disabled:opacity-20 shadow-lg shadow-pink-500/20 border border-white/10 flex items-center justify-center mr-0.5"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white translate-x-0.5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg></button>
+          <input type="text" placeholder={`Bisikin ${config.name}...`} className="flex-1 bg-transparent outline-none py-3.5 text-xs md:text-sm font-semibold text-white placeholder:text-white/20" value={inputText} onChange={e => setInputText(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} />
+          <button onClick={() => handleSend()} disabled={(!inputText.trim() && attachedFiles.length === 0) || isTyping} className="p-3.5 bg-gradient-to-br from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 rounded-full transition-all active:scale-95 disabled:opacity-20 shadow-lg shadow-pink-500/20 border border-white/10 flex items-center justify-center mr-0.5"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white translate-x-0.5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg></button>
         </footer>
       </div>
 
       {showProfilePreview && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-3xl animate-in fade-in duration-300" onClick={() => setShowProfilePreview(false)}>
           <div className="relative max-w-lg w-full aspect-square animate-in zoom-in fade-in duration-500 delay-150" onClick={e => e.stopPropagation()}>
-            <img src={config.profilePic || ''} className="w-full h-full object-cover rounded-[35px] md:rounded-[60px] shadow-2xl border-4 border-white/10" alt="Profile Full" />
-            <div className="absolute top-4 right-4 md:top-6 md:right-6">
-              <button onClick={() => setShowProfilePreview(false)} className="bg-white/10 backdrop-blur-md text-white p-2.5 md:p-3.5 rounded-xl md:rounded-2xl shadow-2xl hover:bg-white hover:text-black hover:scale-110 transition-all border border-white/20">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
+            <img src={config.profilePic || ''} className="w-full h-full object-cover rounded-[60px] shadow-2xl border-4 border-white/10" alt="Profile Full" />
+            
+            {/* FITUR UPLOAD & RESET DI DALAM PREVIEW MODAL */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-4 w-full px-6 justify-center">
+               <label className="bg-pink-600/80 backdrop-blur-xl px-6 py-4 rounded-[25px] cursor-pointer hover:scale-110 active:scale-95 transition-all shadow-2xl border border-white/20 text-white flex items-center gap-3">
+                 <input type="file" className="hidden" accept="image/*" onChange={handleProfileUpload} />
+                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" /></svg>
+                 <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Ganti Foto</span>
+               </label>
+               <button onClick={() => setConfig({ ...config, profilePic: defaultProfilePic })} className="bg-white/10 backdrop-blur-xl px-6 py-4 rounded-[25px] hover:bg-red-500/80 transition-all active:scale-95 shadow-2xl border border-white/20 text-white/80 flex items-center gap-3">
+                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                 <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Reset</span>
+               </button>
             </div>
+
+            <button onClick={() => setShowProfilePreview(false)} className="absolute top-6 right-6 bg-white/10 backdrop-blur-md text-white p-3.5 rounded-2xl shadow-2xl hover:bg-white hover:text-black hover:scale-110 transition-all border border-white/20"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg></button>
           </div>
         </div>
       )}
 
       {previewMedia && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/95 backdrop-blur-3xl animate-in fade-in duration-300" onClick={() => setPreviewMedia(null)}>
-          <div className="relative max-w-4xl w-full flex flex-col items-center gap-4 md:gap-6 animate-in zoom-in duration-500" onClick={e => e.stopPropagation()}>
-            <div className="w-full flex justify-between items-center bg-white/5 backdrop-blur-xl px-4 md:px-6 py-3 md:py-4 rounded-[20px] md:rounded-[25px] border border-white/10 shadow-2xl">
-              <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-white/60 truncate">{previewMedia.name}</p>
-              <button onClick={() => setPreviewMedia(null)} className="p-2.5 bg-white/10 hover:bg-red-500 rounded-xl text-white transition-all active:scale-90 border border-white/10">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
+          <div className="relative max-w-4xl w-full flex flex-col items-center gap-6 animate-in zoom-in duration-500" onClick={e => e.stopPropagation()}>
+            <div className="w-full flex justify-between items-center bg-white/5 backdrop-blur-xl px-6 py-4 rounded-[25px] border border-white/10 shadow-2xl">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 truncate">{previewMedia.name}</p>
+              <button onClick={() => setPreviewMedia(null)} className="p-2.5 bg-white/10 hover:bg-red-500 rounded-xl text-white transition-all active:scale-90 border border-white/10"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
-            <div className="w-full rounded-[30px] md:rounded-[40px] overflow-hidden border border-white/10 shadow-2xl bg-black/40 flex items-center justify-center">
-               {previewMedia.mimeType.startsWith('image/') ? (
-                 <img src={previewMedia.data} className="w-full h-auto max-h-[60vh] md:max-h-[70vh] object-contain" />
-               ) : previewMedia.mimeType.startsWith('video/') ? (
-                 <video src={previewMedia.data} controls autoPlay className="w-full h-auto max-h-[60vh] md:max-h-[70vh]" />
-               ) : (
-                 <div className="py-12 md:py-20 flex flex-col items-center gap-6">
-                    <button onClick={() => downloadMedia(previewMedia.data, previewMedia.name, previewMedia.mimeType)} className="px-6 py-2.5 bg-white text-black font-black rounded-full uppercase text-[10px] hover:scale-110 transition-all">Download</button>
-                 </div>
+            <div className="w-full rounded-[40px] overflow-hidden border border-white/10 shadow-2xl bg-black/40 flex items-center justify-center">
+               {previewMedia.mimeType.startsWith('image/') ? ( <img src={previewMedia.data} className="w-full h-auto max-h-[70vh] object-contain" /> ) : (
+                 <button onClick={() => downloadMedia(previewMedia.data, previewMedia.name, previewMedia.mimeType)} className="px-8 py-3 bg-white text-black font-black rounded-full uppercase text-[10px] hover:scale-110 transition-all">Download</button>
                )}
             </div>
           </div>

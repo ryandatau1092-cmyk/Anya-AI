@@ -46,31 +46,10 @@ const App: React.FC = () => {
     return thread;
   }, [activeMessageId, messages]);
 
-  // INITIALIZATION & MIGRATION
   useEffect(() => {
     const initApp = async () => {
       try {
         await dbService.init();
-
-        // 1. Cek Migrasi dari LocalStorage
-        const oldConfig = localStorage.getItem('anya_config');
-        const oldMessages = localStorage.getItem('anya_messages');
-        const oldActiveId = localStorage.getItem('anya_active_id');
-        const oldSessions = localStorage.getItem('anya_sessions');
-        const oldHistory = localStorage.getItem('anya_history');
-
-        if (oldConfig || oldMessages || oldSessions || oldHistory) {
-          if (oldConfig) await dbService.saveConfig(JSON.parse(oldConfig));
-          if (oldMessages) await dbService.saveMessages(JSON.parse(oldMessages));
-          if (oldActiveId) await dbService.saveActiveMessageId(oldActiveId);
-          if (oldSessions) await dbService.saveSessions(JSON.parse(oldSessions));
-          if (oldHistory) await dbService.saveCallHistory(JSON.parse(oldHistory));
-          
-          const keysToRemove = ['anya_config', 'anya_messages', 'anya_active_id', 'anya_sessions', 'anya_history'];
-          keysToRemove.forEach(k => localStorage.removeItem(k));
-        }
-
-        // 2. Load data dari IndexedDB
         const [savedConfig, savedMessages, savedActiveId, savedSessions, savedHistory] = await Promise.all([
           dbService.getConfig(),
           dbService.getMessages(),
@@ -88,7 +67,6 @@ const App: React.FC = () => {
         if (savedMessages && savedMessages.length > 0) {
           setAppState(AppState.CHAT);
         }
-
         setIsDbReady(true);
       } catch (e) { 
         console.error("Database Error:", e);
@@ -134,24 +112,12 @@ const App: React.FC = () => {
     setIsSidebarOpen(false);
   };
 
-  const deleteSession = (id: string) => {
-    setSessions(prev => prev.filter(s => s.id !== id));
-  };
-
   const clearAllSessions = async () => {
     setMessages([]);
     setActiveMessageId(null);
     setSessions([]);
     setIsSidebarOpen(false);
     setAppState(AppState.SETUP);
-  };
-
-  const deleteCall = (id: string) => {
-    setCallHistory(prev => prev.filter(c => c.id !== id));
-  };
-
-  const clearAllCalls = () => {
-    setCallHistory([]);
   };
 
   const resetAll = async () => {
@@ -165,15 +131,7 @@ const App: React.FC = () => {
   if (!isDbReady) {
     return (
       <div className="h-[100dvh] w-full bg-black flex flex-col items-center justify-center gap-6 animate-in fade-in duration-1000">
-        <div className="relative">
-          <div className="w-16 h-16 border-4 border-pink-500/10 border-t-pink-500 rounded-full animate-spin"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-2 h-2 bg-pink-500 rounded-full animate-ping"></div>
-          </div>
-        </div>
-        <div className="text-center">
-          <p className="text-pink-500 font-black uppercase text-[10px] tracking-[0.5em] animate-pulse">Menghubungkan Database...</p>
-        </div>
+        <div className="w-16 h-16 border-4 border-pink-500/10 border-t-pink-500 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -196,27 +154,28 @@ const App: React.FC = () => {
         history={callHistory}
         onNewChat={startNewChat}
         onLoadSession={loadSession}
-        onDeleteSession={deleteSession}
+        onDeleteSession={(id) => setSessions(prev => prev.filter(s => s.id !== id))}
         onClearSessions={clearAllSessions}
-        onDeleteCall={deleteCall}
-        onClearCalls={clearAllCalls}
+        onDeleteCall={(id) => setCallHistory(prev => prev.filter(c => c.id !== id))}
+        onClearCalls={() => setCallHistory([])}
         onReset={resetAll}
       />
 
       <main className="relative z-10 w-full h-full flex flex-col items-center justify-start overflow-hidden transition-all duration-500">
         {appState === AppState.SETUP && (
-          <div className="w-full h-full flex items-center justify-center animate-in fade-in slide-in-from-top-4 duration-700 p-2">
+          <div className="w-full h-full flex items-center justify-center p-2">
             <SetupView 
               config={config} 
               setConfig={setConfig} 
               onStart={() => setAppState(AppState.CHAT)} 
               onReset={resetAll} 
+              defaultProfilePic={ANYA_DEFAULT_PIC}
               onClose={messages.length > 0 ? () => setAppState(AppState.CHAT) : undefined}
             />
           </div>
         )}
         {appState === AppState.CHAT && (
-          <div className="w-full h-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="w-full h-full">
             <ChatView 
               config={config} 
               setConfig={setConfig}
@@ -233,13 +192,11 @@ const App: React.FC = () => {
           </div>
         )}
         {appState === AppState.CALL && (
-          <div className="w-full h-full animate-in zoom-in fade-in duration-500">
+          <div className="w-full h-full">
             <CallView 
               config={config}
               onEndCall={(duration) => {
-                if (duration !== "0:00") {
-                  setCallHistory(prev => [{ id: Date.now().toString(), timestamp: Date.now(), duration, status: 'completed' }, ...prev]);
-                }
+                if (duration !== "0:00") setCallHistory(prev => [{ id: Date.now().toString(), timestamp: Date.now(), duration, status: 'completed' }, ...prev]);
                 setAppState(AppState.CHAT);
               }}
             />
