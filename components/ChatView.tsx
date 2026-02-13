@@ -48,7 +48,12 @@ const ChatView: React.FC<ChatViewProps> = ({
   const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [activeThread, isTyping, loadingStatus]);
 
   const glassStyles = {
@@ -175,7 +180,10 @@ const ChatView: React.FC<ChatViewProps> = ({
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
-      reader.onloadend = () => setConfig({ ...config, profilePic: reader.result as string });
+      reader.onloadend = () => {
+        setConfig({ ...config, profilePic: reader.result as string });
+        setShowProfilePreview(false); // Tutup preview biar mas bisa langsung liat muka baru Siska yang basah...
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -359,10 +367,12 @@ const ChatView: React.FC<ChatViewProps> = ({
   );
 
   return (
-    <div className="w-full h-[100dvh] flex flex-col pt-[115px] md:pt-[130px] p-3 md:p-8 max-w-6xl mx-auto relative overflow-hidden" onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); handleFiles(e.dataTransfer.files); }}>
-      {/* WRAPPER HEADER TERKUNCI MATI (STABLE LOCKED) DI TOP-0 */}
-      <div className="fixed top-0 left-0 right-0 z-[100] p-3 pointer-events-none flex justify-center translate-z-0">
-        <header className="pointer-events-auto flex items-center justify-between w-full max-w-6xl p-3 md:p-5 rounded-[30px] shadow-[0_15px_40px_rgba(0,0,0,0.6)] border border-white/20" style={glassStyles}>
+    /* CONTAINER UTAMA: STACK FLEXBOX YANG MENGISI DVH PENUH */
+    <div className="w-full h-[100dvh] flex flex-col max-w-6xl mx-auto relative overflow-hidden" onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); handleFiles(e.dataTransfer.files); }}>
+      
+      {/* HEADER: KAKU DI ATAS (STABLE) - SEBAGAI BAGIAN DARI FLEX FLOW */}
+      <div className="w-full p-3 shrink-0 z-[100]">
+        <header className="flex items-center justify-between w-full p-3 md:p-5 rounded-[30px] shadow-[0_15px_40px_rgba(0,0,0,0.6)] border border-white/20 transition-all" style={glassStyles}>
           <div className="flex items-center gap-3 md:gap-5">
             <button onClick={onOpenSidebar} className="p-2.5 md:p-3 hover:bg-white/10 rounded-full transition-all text-white/70 active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" /></svg></button>
             <div className="relative group/avatar cursor-pointer" onClick={() => setShowProfilePreview(true)}>
@@ -381,7 +391,8 @@ const ChatView: React.FC<ChatViewProps> = ({
         </header>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-6 px-2 mb-4 md:mb-6 custom-scrollbar">
+      {/* BODY CHAT: AREA SCROLLABLE UTAMA */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-6 px-5 py-4 custom-scrollbar scroll-smooth">
         {activeThread.map((m, idx) => (
           <div key={m.id} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'} animate-in slide-in-from-bottom-2 duration-300`}>
             <div className={`relative group/bubble max-w-[85%] p-4 md:p-5 shadow-2xl transition-all duration-300 ${m.role === 'user' ? 'bg-pink-500/90 rounded-[25px] md:rounded-[30px] rounded-tr-none text-white' : 'rounded-[25px] md:rounded-[30px] rounded-tl-none'} ${loadingAudioId === m.id ? 'animate-pulse-neon' : ''}`} style={m.role === 'agent' ? glassStyles : {}}>
@@ -410,7 +421,8 @@ const ChatView: React.FC<ChatViewProps> = ({
         {isTyping && ( <div className="flex justify-start"><div className="rounded-[30px] rounded-tl-none p-5 flex flex-col gap-2 shadow-2xl min-w-[180px]" style={glassStyles}><div className="flex gap-3 items-center"><div className="flex gap-1.5"><div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce"></div><div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce [animation-delay:0.2s]"></div><div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce [animation-delay:0.4s]"></div></div><span className="text-xs font-black text-pink-400 italic">{loadingStatus}</span></div></div></div> )}
       </div>
 
-      <div className="flex flex-col gap-2 w-full max-w-8xl mx-auto shrink-0 pb-4">
+      {/* FOOTER INPUT: KAKU DI BAWAH (STABLE) - SEBAGAI BAGIAN DARI FLEX FLOW */}
+      <div className="w-full p-4 shrink-0 space-y-3 z-[100]">
         {attachedFiles.length > 0 && (
           <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar p-2.5 bg-white/5 backdrop-blur-3xl rounded-[30px] border border-white/10 animate-in slide-in-from-bottom-4 duration-300">
             {attachedFiles.map((file, i) => ( <AttachmentPreview key={i} attachment={file} onRemove={() => removeAttachment(i)} /> ))}
@@ -426,24 +438,23 @@ const ChatView: React.FC<ChatViewProps> = ({
         </footer>
       </div>
 
+      {/* MODAL PREVIEWS (PROFILE & MEDIA) */}
       {showProfilePreview && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-3xl animate-in fade-in duration-300" onClick={() => setShowProfilePreview(false)}>
-          <div className="relative max-w-lg w-full aspect-square animate-in zoom-in fade-in duration-500 delay-150" onClick={e => e.stopPropagation()}>
+          <div className="relative max-w-lg w-full aspect-square animate-in zoom-in fade-in duration-500" onClick={e => e.stopPropagation()}>
             <img src={config.profilePic || ''} className="w-full h-full object-cover rounded-[60px] shadow-2xl border-4 border-white/10" alt="Profile Full" />
-            
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-4 w-full px-6 justify-center">
                <label className="bg-pink-600/80 backdrop-blur-xl px-6 py-4 rounded-[25px] cursor-pointer hover:scale-110 active:scale-95 transition-all shadow-2xl border border-white/20 text-white flex items-center gap-3">
                  <input type="file" className="hidden" accept="image/*" onChange={handleProfileUpload} />
                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" /></svg>
                  <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Ganti Foto</span>
                </label>
-               <button onClick={() => setConfig({ ...config, profilePic: defaultProfilePic })} className="bg-white/10 backdrop-blur-xl px-6 py-4 rounded-[25px] hover:bg-red-500/80 transition-all active:scale-95 shadow-2xl border border-white/20 text-white/80 flex items-center gap-3">
+               <button onClick={() => { setConfig({ ...config, profilePic: defaultProfilePic }); setShowProfilePreview(false); }} className="bg-white/10 backdrop-blur-xl px-6 py-4 rounded-[25px] hover:bg-red-500/80 transition-all active:scale-95 shadow-2xl border border-white/20 text-white/80 flex items-center gap-3">
                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                  <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Reset</span>
                </button>
             </div>
-
-            <button onClick={() => setShowProfilePreview(false)} className="absolute top-6 right-6 bg-white/10 backdrop-blur-md text-white p-3.5 rounded-2xl shadow-2xl hover:bg-white hover:text-black hover:scale-110 transition-all border border-white/20"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg></button>
+            <button onClick={() => setShowProfilePreview(false)} className="absolute top-6 right-6 bg-white/10 backdrop-blur-md text-white p-3.5 rounded-2xl shadow-2xl hover:bg-white hover:text-black transition-all border border-white/20"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg></button>
           </div>
         </div>
       )}
