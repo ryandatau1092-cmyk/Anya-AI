@@ -161,7 +161,7 @@ const App: React.FC = () => {
         onReset={resetAll}
       />
 
-      <main className="relative z-10 w-full h-full flex flex-col items-center justify-start overflow-hidden transition-all duration-500">
+      <main className="relative z-10 w-full h-full flex flex-col items-center justify-start overflow-hidden">
         {appState === AppState.SETUP && (
           <div className="w-full h-full flex items-center justify-center p-2">
             <SetupView 

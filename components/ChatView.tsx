@@ -359,10 +359,10 @@ const ChatView: React.FC<ChatViewProps> = ({
   );
 
   return (
-    <div className="w-full h-[100dvh] flex flex-col pt-[105px] md:pt-[120px] p-3 md:p-8 max-w-6xl mx-auto relative overflow-hidden" onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); handleFiles(e.dataTransfer.files); }}>
-      {/* WRAPPER HEADER TERKUNCI (LOCKED) DI TOP-0 */}
-      <div className="fixed top-0 left-0 right-0 z-[100] p-3 pointer-events-none flex justify-center">
-        <header className="pointer-events-auto flex items-center justify-between w-full max-w-6xl p-3 md:p-5 rounded-[30px] shadow-[0_15px_40px_rgba(0,0,0,0.6)] transition-all duration-300 border border-white/20" style={glassStyles}>
+    <div className="w-full h-[100dvh] flex flex-col pt-[115px] md:pt-[130px] p-3 md:p-8 max-w-6xl mx-auto relative overflow-hidden" onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); handleFiles(e.dataTransfer.files); }}>
+      {/* WRAPPER HEADER TERKUNCI MATI (STABLE LOCKED) DI TOP-0 */}
+      <div className="fixed top-0 left-0 right-0 z-[100] p-3 pointer-events-none flex justify-center translate-z-0">
+        <header className="pointer-events-auto flex items-center justify-between w-full max-w-6xl p-3 md:p-5 rounded-[30px] shadow-[0_15px_40px_rgba(0,0,0,0.6)] border border-white/20" style={glassStyles}>
           <div className="flex items-center gap-3 md:gap-5">
             <button onClick={onOpenSidebar} className="p-2.5 md:p-3 hover:bg-white/10 rounded-full transition-all text-white/70 active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" /></svg></button>
             <div className="relative group/avatar cursor-pointer" onClick={() => setShowProfilePreview(true)}>
