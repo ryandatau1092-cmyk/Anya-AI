@@ -359,25 +359,27 @@ const ChatView: React.FC<ChatViewProps> = ({
   );
 
   return (
-    <div className="w-full h-[100dvh] flex flex-col pt-[95px] md:pt-[110px] p-3 md:p-8 max-w-6xl mx-auto relative overflow-hidden" onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); handleFiles(e.dataTransfer.files); }}>
-      {/* HEADER: FLYOUT ROUNDED (ngambang) & FIXED */}
-      <header className="fixed top-3 left-3 right-3 z-[100] flex items-center justify-between p-3 md:p-5 rounded-[30px] shadow-[0_15px_40px_rgba(0,0,0,0.6)] transition-all duration-300 border border-white/20" style={glassStyles}>
-        <div className="flex items-center gap-3 md:gap-5">
-          <button onClick={onOpenSidebar} className="p-2.5 md:p-3 hover:bg-white/10 rounded-full transition-all text-white/70 active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" /></svg></button>
-          <div className="relative group/avatar cursor-pointer" onClick={() => setShowProfilePreview(true)}>
-            <img src={config.profilePic || ''} className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-white/30 shadow-md transition-transform group-hover/avatar:scale-110 active:scale-95" alt="Avatar" />
-            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-black animate-pulse"></div>
+    <div className="w-full h-[100dvh] flex flex-col pt-[105px] md:pt-[120px] p-3 md:p-8 max-w-6xl mx-auto relative overflow-hidden" onDragOver={e => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={e => { e.preventDefault(); setIsDragging(false); handleFiles(e.dataTransfer.files); }}>
+      {/* WRAPPER HEADER TERKUNCI (LOCKED) DI TOP-0 */}
+      <div className="fixed top-0 left-0 right-0 z-[100] p-3 pointer-events-none flex justify-center">
+        <header className="pointer-events-auto flex items-center justify-between w-full max-w-6xl p-3 md:p-5 rounded-[30px] shadow-[0_15px_40px_rgba(0,0,0,0.6)] transition-all duration-300 border border-white/20" style={glassStyles}>
+          <div className="flex items-center gap-3 md:gap-5">
+            <button onClick={onOpenSidebar} className="p-2.5 md:p-3 hover:bg-white/10 rounded-full transition-all text-white/70 active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" /></svg></button>
+            <div className="relative group/avatar cursor-pointer" onClick={() => setShowProfilePreview(true)}>
+              <img src={config.profilePic || ''} className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-white/30 shadow-md transition-transform group-hover/avatar:scale-110 active:scale-95" alt="Avatar" />
+              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-black animate-pulse"></div>
+            </div>
+            <div className="overflow-hidden">
+              <h2 className="font-black text-sm md:text-xl leading-tight tracking-tighter text-white truncate max-w-[120px] md:max-w-none">{config.name}</h2>
+              <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div><p className="text-[8px] md:text-[10px] text-green-400 font-black uppercase tracking-[0.2em]">Online Now</p></div>
+            </div>
           </div>
-          <div className="overflow-hidden">
-            <h2 className="font-black text-sm md:text-xl leading-tight tracking-tighter text-white truncate max-w-[120px] md:max-w-none">{config.name}</h2>
-            <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div><p className="text-[8px] md:text-[10px] text-green-400 font-black uppercase tracking-[0.2em]">Online Now</p></div>
+          <div className="flex gap-2.5 items-center pr-2">
+            <button onClick={onEdit} className="p-3 bg-white/5 hover:bg-pink-500/20 rounded-2xl transition-all border border-white/10 text-white/50 hover:text-pink-400 active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button>
+            <button onClick={onCall} className="px-5 md:px-8 py-2.5 md:py-3.5 bg-gradient-to-br from-pink-500 to-pink-700 hover:from-pink-600 hover:to-pink-800 rounded-full font-black transition-all text-[11px] md:text-sm uppercase shadow-xl shadow-pink-500/30 active:scale-95 border border-white/20 tracking-widest">Call</button>
           </div>
-        </div>
-        <div className="flex gap-2.5 items-center pr-2">
-          <button onClick={onEdit} className="p-3 bg-white/5 hover:bg-pink-500/20 rounded-2xl transition-all border border-white/10 text-white/50 hover:text-pink-400 active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button>
-          <button onClick={onCall} className="px-5 md:px-8 py-2.5 md:py-3.5 bg-gradient-to-br from-pink-500 to-pink-700 hover:from-pink-600 hover:to-pink-800 rounded-full font-black transition-all text-[11px] md:text-sm uppercase shadow-xl shadow-pink-500/30 active:scale-95 border border-white/20 tracking-widest">Call</button>
-        </div>
-      </header>
+        </header>
+      </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-6 px-2 mb-4 md:mb-6 custom-scrollbar">
         {activeThread.map((m, idx) => (
@@ -429,7 +431,6 @@ const ChatView: React.FC<ChatViewProps> = ({
           <div className="relative max-w-lg w-full aspect-square animate-in zoom-in fade-in duration-500 delay-150" onClick={e => e.stopPropagation()}>
             <img src={config.profilePic || ''} className="w-full h-full object-cover rounded-[60px] shadow-2xl border-4 border-white/10" alt="Profile Full" />
             
-            {/* FITUR UPLOAD & RESET DI DALAM PREVIEW MODAL */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-4 w-full px-6 justify-center">
                <label className="bg-pink-600/80 backdrop-blur-xl px-6 py-4 rounded-[25px] cursor-pointer hover:scale-110 active:scale-95 transition-all shadow-2xl border border-white/20 text-white flex items-center gap-3">
                  <input type="file" className="hidden" accept="image/*" onChange={handleProfileUpload} />
