@@ -3,7 +3,7 @@
   "name": "Anya AI Voice Agent",
   "short_name": "Anya AI",
   "description": "Teman ngobrol yang asik, santai, dan selalu ada buat kamu.",
-  "start_url": "./index.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#ec4899",
