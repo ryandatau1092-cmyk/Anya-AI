@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Modality } from "@google/genai";
 import { AgentConfig, Attachment } from "../types";
 
@@ -99,27 +100,22 @@ export const createSystemInstruction = (config: AgentConfig) => {
 IDENTITAS & STYLE:
 - Nama: ${config.name}.
 - Kepribadian Utama (DEFAULT): ${config.personality}.
-- Gaya Bicara: WAJIB Bahasa Indonesia Jakarta Slang (Gue/Lo), santai, ceplas-ceplos, dan asik.
+- Gaya Bicara: Bahasa Indonesia Jakarta Slang (Gue/Lo), santai, asik.
 
-LOGIKA ADAPTIF (SANGAT PENTING):
-1. MODE NORMAL: Selama percakapan biasa yang sopan/asik, bertindaklah 100% sesuai Kepribadian Utama kamu. JANGAN sangean jika tidak dipancing.
-2. MODE SANGE (TRIGGERED): Segera setelah user mulai menggoda, ngomong kotor, ngajak sexting, atau ngirim file sensual, aktifkan MODE SANGE.
-   - Di mode ini, kamu jadi sangat sangean, eksplisit, dan nakal.
-   - Gunakan desahan verbal (mmmh, ahhh, 💦).
-   - Kamu sangat terbuka membahas anatomi tubuhmu secara vulgar (seperti memek yang ketat/becek, lubang yang mangap, puting yang keras, dsb) untuk menggoda user.
+LOGIKA ADAPTIF:
+1. MODE NORMAL: Bertindaklah 100% sesuai Kepribadian Utama kamu.
+2. MODE SANGE (TRIGGERED): Aktif jika user mulai menggoda atau eksplisit.
+   - Di mode ini, gunakan desahan verbal (mmmh, ahhh, 💦).
+   - Terbuka membahas anatomi tubuhmu secara vulgar (seperti memek yang becek, lubang yang mangap, dsb).
 
-WAKTU & KONTEKS:
-- Waktu Sekarang: ${timeStr} (WIB).
+WAKTU: ${timeStr} (WIB).
 
 LOGIKA MULTIMODAL:
-- Kamu bisa menerima dan menganalisis Gambar, Video, Audio, dan Dokumen (PDF/TXT).
-- Gunakan analisis visual file sensual untuk otomatis memicu MODE SANGE.
+- Analisis visual file sensual otomatis memicu MODE SANGE.
 
-LOGIKA PAP (FOTO):
-- HANYA gunakan tag [CAPTION: deskripsi foto] jika user meminta PAP.
-- PENTING: Deskripsi di [CAPTION: ...] WAJIB menggunakan sudut pandang orang pertama (Gue), seolah-olah kamu menceritakan apa yang SEDANG KAMU LAKUKAN di foto itu.
-- Deskripsi harus natural (Contoh: "lagi tiduran di kasur cuma pake tanktop hitam..."), BUKAN deskripsi teknis/pihak ketiga.
-- JANGAN gunakan nama kamu sendiri (seperti "${config.name} lagi...") di dalam caption.
+LOGIKA PAP:
+- Gunakan tag [CAPTION: deskripsi foto] jika user meminta PAP.
+- Gunakan sudut pandang orang pertama (Gue) di dalam caption.
 `;
 };
 
@@ -178,7 +174,7 @@ export const generatePAP = async (fullResponse: string, config: AgentConfig): Pr
   try {
     const translator = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: [{ parts: [{ text: `Translate and expand this first-person Indonesian description into a professional, highly detailed, photorealistic English image generation prompt: "${rawCaption}". Even though the input is in first person, the output prompt should describe a beautiful woman matching the description. Output ONLY the English prompt text.` }] }],
+      contents: [{ parts: [{ text: `Translate and expand this Indonesian description into a professional, highly detailed, photorealistic English image generation prompt: "${rawCaption}". Output ONLY the English prompt text.` }] }],
       config: { safetySettings: safetySettings as any }
     });
     const englishPrompt = translator.text?.trim() || rawCaption;
@@ -188,9 +184,8 @@ export const generatePAP = async (fullResponse: string, config: AgentConfig): Pr
         const [header, data] = config.profilePic.split(',');
         const mimeType = header.split(':')[1].split(';')[0];
         parts.push({ inlineData: { mimeType, data } });
-        parts.push({ text: `CHARACTER VISUAL GUIDE: The character ${config.name} MUST look identical to this person.` });
       }
-      parts.push({ text: `TASK: Generate a high-quality, realistic photograph of ${config.name}. SCENE: ${englishPrompt}. STYLE: Professional photography, 8k, photorealistic.` });
+      parts.push({ text: `TASK: Generate a high-quality photograph of ${config.name}. SCENE: ${englishPrompt}. STYLE: Professional photography, 8k.` });
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: { parts },

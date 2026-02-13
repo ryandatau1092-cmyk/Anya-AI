@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anya AI Voice Agent</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Polyfill biar process.env.API_KEY nggak bikin 'becek' pas di-deploy
+        window.process = window.process || { env: {} };
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -94,5 +98,7 @@
 </head>
 <body class="bg-black text-white">
     <div id="root"></div>
+    <!-- Entry point buat aplikasi kita sayang... biar langsung 'masuk'... mmmh... 💦 -->
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>
